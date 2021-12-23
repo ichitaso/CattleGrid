@@ -32,19 +32,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
 
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey: Any] = [:]) -> Bool {
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         let needTo = url.startAccessingSecurityScopedResource()
+
         let fm = FileManager.default
-        #if JAILBREAK
-        let doc = URL(fileURLWithPath: "/var/mobile/tagbin/", isDirectory: true)
-        let destination = doc.appendingPathComponent(url.lastPathComponent)
-        #else
         let doc = fm.urls(for: .documentDirectory, in: .userDomainMask).first
         guard let destination = doc?.appendingPathComponent(url.lastPathComponent) else {
             return false
         }
-        #endif
-
 
         print("copy \(url) to \(destination)")
         do {
@@ -56,7 +51,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         tagStore.loadList()
 
         if needTo {
-            url.stopAccessingSecurityScopedResource()
+          url.stopAccessingSecurityScopedResource()
         }
         return true
     }

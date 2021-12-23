@@ -13,7 +13,7 @@ public class DirectoryWatcher: NSObject {
     static let retryCount = 5
     static let pollInterval = 0.2
     var watchedUrl: URL
-
+    
     private var source: DispatchSourceFileSystemObject?
     private var previousContents: Set<URL>
     private var queue: DispatchQueue?
@@ -23,14 +23,14 @@ public class DirectoryWatcher: NSObject {
     public var ignoreDirectories = true
     public var onNewFiles: (([URL]) -> Void)?
     public var onDeletedFiles: (([URL]) -> Void)?
-
+    
     //init
     init(watchedUrl: URL) {
         self.watchedUrl = watchedUrl
         let contentsArray = (try? FileManager.default.contentsOfDirectory(at: watchedUrl, includingPropertiesForKeys: [.isDirectoryKey], options: .skipsHiddenFiles)) ?? []
         self.previousContents = Set(contentsArray)
     }
-
+    
     public class func watch(_ url: URL) -> DirectoryWatcher? {
         let directoryWatcher = DirectoryWatcher(watchedUrl: url)
 
@@ -41,46 +41,42 @@ public class DirectoryWatcher: NSObject {
 
         return directoryWatcher
     }
-
+    
     public func startWatching() -> Bool {
         // Already monitoring
-        guard self.source == nil else {
-            return false
-        }
-
+        guard self.source == nil else { return false }
+        
         let descriptor = open(self.watchedUrl.path, O_EVTONLY)
-        guard descriptor != -1 else {
-            return false
-        }
-
+        guard descriptor != -1 else { return false }
+        
         self.queue = DispatchQueue.global()
         self.source = DispatchSource.makeFileSystemObjectSource(fileDescriptor: descriptor, eventMask: .write, queue: self.queue)
-
+        
         self.source?.setEventHandler {
             [weak self] in
             self?.directoryDidChange()
         }
-
+        
         self.source?.setCancelHandler() {
             close(descriptor)
         }
-
+        
         self.source?.resume()
-
+        
         return true
     }
-
+    
     public func stopWatching() -> Bool {
         guard let source = source else {
             return false
         }
-
+        
         source.cancel()
         self.source = nil
-
+        
         return true
     }
-
+    
     deinit {
         let _ = self.stopWatching()
         self.onNewFiles = nil
@@ -100,8 +96,8 @@ extension DirectoryWatcher {
             let fileUrl = url.appendingPathComponent(filename)
 
             guard let fileAttributes = try? FileManager.default.attributesOfItem(atPath: fileUrl.path),
-                  let fileSize = fileAttributes[.size] as? Double else {
-                continue
+                let fileSize = fileAttributes[.size] as? Double else {
+                    continue
             }
 
             let sizeString = String(Int(fileSize))
@@ -115,8 +111,8 @@ extension DirectoryWatcher {
 
     private func checkChanges(after delay: TimeInterval) {
         guard let directoryMetadata = self.directoryMetadata(self.watchedUrl),
-              let queue = self.queue else {
-            return
+            let queue = self.queue else {
+                return
         }
 
         let time = DispatchTime.now() + delay
@@ -126,15 +122,15 @@ extension DirectoryWatcher {
         }
     }
 
-    private func pollDirectoryForChangesWith(_ oldMetadata: [String]) {
+    private func pollDirectoryForChangesWith(_ oldMetadata: [String]){
         guard let newDirectoryMetadata = self.directoryMetadata(self.watchedUrl) else {
             return
         }
 
         self.directoryChanging = newDirectoryMetadata != oldMetadata
         self.retriesLeft = self.directoryChanging
-                ? DirectoryWatcher.retryCount
-                : self.retriesLeft
+            ? DirectoryWatcher.retryCount
+            : self.retriesLeft
 
         self.retriesLeft = self.retriesLeft - 1
         if self.directoryChanging || 0 < self.retriesLeft {

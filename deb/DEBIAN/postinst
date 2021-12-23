@@ -1,9 +1,0 @@
-#!/bin/bash
-
-su mobile -c 'mkdir -p /var/mobile/tagbin' &>/dev/null
-
-echo " Running uicache..."
-su mobile -c uicache &>/dev/null
-echo " Running uicache... Done."
-
-exit 0;

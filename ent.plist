@@ -5,7 +5,7 @@
 	<true/>
 	<key>com.apple.private.skip-library-validation</key>
 	<true/>
-    <key>com.apple.developer.nfc.readersession.formats</key>
+	<key>com.apple.developer.nfc.readersession.formats</key>
 	<array>
 		<string>NDEF</string>
 		<string>TAG</string>

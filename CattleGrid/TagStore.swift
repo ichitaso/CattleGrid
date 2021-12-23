@@ -11,7 +11,7 @@ import SwiftUI
 import CoreNFC
 import amiitool
 
-enum MifareCommands: UInt8 {
+enum MifareCommands : UInt8 {
     case READ = 0x30
     case WRITE = 0xA2
     case PWD_AUTH = 0x1B
@@ -19,7 +19,11 @@ enum MifareCommands: UInt8 {
 
 let NTAG_PAGE_SIZE = 4
 
-enum NTAG215Pages: UInt8 {
+let KEY_RETAIL = "key_retail.bin"
+let KEY_RETAIL_SIZE = 160
+let KEY_RETAIL_SHA1 = "bbdbb49a917d14f7a997d327ba40d40c39e606ce"
+
+enum NTAG215Pages : UInt8 {
     case staticLockBits = 2
     case capabilityContainer = 3
     case userMemoryFirst = 4
@@ -41,43 +45,33 @@ let CFG0 = Data([0x00, 0x00, 0x00, 0x04])
 let CFG1 = Data([0x5f, 0x00, 0x00, 0x00])
 let PACKRFUI = Data([0x80, 0x80, 0x00, 0x00])
 
-class TagStore: NSObject, ObservableObject, NFCTagReaderSessionDelegate {
+class TagStore : NSObject, ObservableObject, NFCTagReaderSessionDelegate {
     static let shared = TagStore()
     @Published private(set) var files: [URL] = []
     @Published private(set) var selected: URL?
-    @Published private(set) var progress: Float = 0
-    @Published private(set) var error: String = ""
-    @Published private(set) var readingAvailable: Bool = NFCReaderSession.readingAvailable
-    #if JAILBREAK
-    @Published private(set) var currentDir: URL = URL(fileURLWithPath: "/var/mobile/tagbin/", isDirectory: true)
-    let documents = URL(fileURLWithPath: "/var/mobile/tagbin/", isDirectory: true)
-    #else
-    @Published private(set) var currentDir: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-    let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
-    #endif
+    @Published private(set) var progress : Float = 0
+    @Published private(set) var error : String = ""
+    @Published private(set) var readingAvailable : Bool = NFCReaderSession.readingAvailable
+    @Published private(set) var currentDir : URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
 
-    let fm = FileManager.default
-
-    var lastPageWritten: UInt8 = 0 {
+    var lastPageWritten : UInt8 = 0 {
         willSet(newVal) {
             self.progress = Float(newVal) / Float(NTAG215Pages.total.rawValue)
         }
     }
 
-    var amiitool: Amiitool?
-    var plain: Data = Data()
-    var watcher: DirectoryWatcher? = nil
+    let fm = FileManager.default
+    let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+
+    var amiitool : Amiitool?
+    var plain : Data = Data()
+    var watcher : DirectoryWatcher? = nil
 
 
     func start() {
         print("Start")
-        print(documents)
-        guard let key_retail = Bundle.main.path(forResource: "key_retail", ofType: "bin", inDirectory: nil) else {
-            return
-        }
 
-        self.amiitool = Amiitool(path: key_retail)
-
+        _ = self.loadKeyRetail()
         self.loadList()
 
         if self.watcher == nil {
@@ -87,6 +81,9 @@ class TagStore: NSObject, ObservableObject, NFCTagReaderSessionDelegate {
             }
 
             watcher.onNewFiles = { newFiles in
+                if (self.amiitool == nil) {
+                    _ = self.loadKeyRetail();
+                }
                 self.loadList()
             }
 
@@ -113,12 +110,68 @@ class TagStore: NSObject, ObservableObject, NFCTagReaderSessionDelegate {
         }
     }
 
+    func loadKeyRetail() -> Bool {
+        let key_retail = self.documents.appendingPathComponent(KEY_RETAIL).path
+        if (!fm.fileExists(atPath: key_retail)) {
+            self.error = "\(key_retail) missing"
+            do {
+                let LA_PATH = FileManager.default.urls(for: .applicationSupportDirectory, in: .localDomainMask).first!
+                let keyPath = LA_PATH.appendingPathComponent(KEY_RETAIL)
+                try fm.copyItem(at: keyPath, to: self.documents.appendingPathComponent(KEY_RETAIL))
+            } catch {
+                return false
+            }
+        }
+        do {
+            let attr = try fm.attributesOfItem(atPath: key_retail)
+            let fileSize = attr[FileAttributeKey.size] as! UInt64
+            if (fileSize != KEY_RETAIL_SIZE) {
+                self.error = "\(KEY_RETAIL) is not the correct size"
+                return false
+            }
+        } catch {
+            print(error)
+            self.error = "Error getting size of \(KEY_RETAIL)"
+            return false
+        }
+
+        guard let sha1sum = SHA1.hexString(fromFile: key_retail) else {
+            self.error = "Couoldn't calculate \(KEY_RETAIL) sha1"
+            return false
+        }
+
+        let normalizedSha1 = sha1sum.lowercased().filter { !$0.isNewline && !$0.isWhitespace }
+        if (normalizedSha1 != KEY_RETAIL_SHA1) {
+            self.error = "\(KEY_RETAIL) has the wrong sha1"
+            print("\(KEY_RETAIL) sha is \(sha1sum)")
+            return false
+        }
+
+        self.error = ""
+        self.amiitool = Amiitool(path: key_retail)
+        return true
+    }
+
     func loadList() {
-        let items = try? fm.contentsOfDirectory(at: self.currentDir, includingPropertiesForKeys: [], options: [.skipsHiddenFiles, .skipsPackageDescendants, .skipsSubdirectoryDescendants])
-        files = items!.filter({ (item) -> Bool in
-            let isDir = (try? item.resourceValues(forKeys: [.isDirectoryKey]).isDirectory) ?? false
-            return isDir || (item.pathExtension == "bin")
-        }).sorted(by: { $0.lastPathComponent < $1.lastPathComponent })
+        guard self.loadKeyRetail() else {
+            return
+        }
+        do {
+            let items = try fm.contentsOfDirectory(at: self.currentDir, includingPropertiesForKeys: [], options: [.skipsHiddenFiles, .skipsPackageDescendants, .skipsSubdirectoryDescendants])
+            let sortedItems = items.sorted(by: { $0.lastPathComponent < $1.lastPathComponent})
+            files = sortedItems.filter({ (item) -> Bool in
+                do {
+                    let isDir = (try item.resourceValues(forKeys: [.isDirectoryKey])).isDirectory ?? false
+                    let isKeyRetail = item.lastPathComponent == KEY_RETAIL
+
+                    return isDir || (!isKeyRetail && item.pathExtension == "bin")
+                } catch {
+                    return false
+                }
+            })
+        } catch {
+            // failed to read directory – bad permissions, perhaps?
+        }
     }
 
     func load(_ path: URL) {
@@ -140,6 +193,9 @@ class TagStore: NSObject, ObservableObject, NFCTagReaderSessionDelegate {
     }
 
     func loadFile(_ path: URL) {
+        guard loadKeyRetail() else {
+            return
+        }
         guard let amiitool = self.amiitool else {
             self.error = "Internal error: amiitool not initialized"
             return
@@ -149,7 +205,7 @@ class TagStore: NSObject, ObservableObject, NFCTagReaderSessionDelegate {
             let tag = try Data(contentsOf: path)
 
             let start = NTAG_PAGE_SIZE * Int(NTAG215Pages.characterModelHead.rawValue)
-            let end = NTAG_PAGE_SIZE * Int(NTAG215Pages.characterModelTail.rawValue + 1)
+            let end = NTAG_PAGE_SIZE * Int(NTAG215Pages.characterModelTail.rawValue+1)
             let id = tag.subdata(in: start..<end)
             print("character id: \(id.hexDescription)")
 
@@ -308,7 +364,7 @@ class TagStore: NSObject, ObservableObject, NFCTagReaderSessionDelegate {
 
         let page = data.page(startPage)
         writePage(tag, page: startPage, data: page) {
-            self.writeUserPages(tag, startPage: startPage + 1, data: data) { () in
+            self.writeUserPages(tag, startPage: startPage+1, data: data) { () in
                 completionHandler()
             }
         }
@@ -349,7 +405,7 @@ class TagStore: NSObject, ObservableObject, NFCTagReaderSessionDelegate {
                 print(error as Any)
                 return
             }
-            self.readAllPages(tag, startPage: startPage + 4) { (contents) in
+            self.readAllPages(tag, startPage: startPage+4) { (contents) in
                 completionHandler(data + contents)
             }
         }
