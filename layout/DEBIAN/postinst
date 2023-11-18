@@ -1,0 +1,5 @@
+#!/bin/bash
+
+su mobile -c 'mkdir -p /var/mobile/Documents/CattleGrid' &>/dev/null
+
+exit 0

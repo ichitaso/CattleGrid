@@ -1,0 +1,16 @@
+Author: Eric Betts
+Maintainer: ichitaso
+Package: com.ichitaso.cattlegrid
+Name: CattleGrid
+Depends: firmware (>= 13.0), gsc.nfc
+Conflicts: org.ericbetts.CattleGrid
+Replaces: com.ichitaso.cattlegrid
+Section: Utilities
+Version: 1.1.1
+Architecture: iphoneos-arm
+Description: nintendo amiibo ntag writing app
+Depiction: https://cydia.ichitaso.com/depiction/cattlegrid.html
+dev: Eric Betts <https://gitlab.com/bettse>
+Icon: https://raw.githubusercontent.com/ichitaso/CattleGrid/master/CattleGrid/Assets.xcassets/AppIcon.appiconset/appicon-120.png
+Homepage: https://ichitaso.com
+SileoDepiction: https://cydia.ichitaso.com/depiction/cattlegrid.json

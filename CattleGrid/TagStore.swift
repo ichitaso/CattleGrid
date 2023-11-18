@@ -52,7 +52,13 @@ class TagStore : NSObject, ObservableObject, NFCTagReaderSessionDelegate {
     @Published private(set) var progress : Float = 0
     @Published private(set) var error : String = ""
     @Published private(set) var readingAvailable : Bool = NFCReaderSession.readingAvailable
-    @Published private(set) var currentDir : URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+#if JAILBREAK
+    @Published private(set) var currentDir: URL = URL(fileURLWithPath: "/var/mobile/Documents/CattleGrid/", isDirectory: true)
+    let documents = URL(fileURLWithPath: "/var/mobile/Documents/CattleGrid/", isDirectory: true)
+#else
+    @Published private(set) var currentDir: URL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+    let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+#endif
 
     var lastPageWritten : UInt8 = 0 {
         willSet(newVal) {
@@ -61,7 +67,6 @@ class TagStore : NSObject, ObservableObject, NFCTagReaderSessionDelegate {
     }
 
     let fm = FileManager.default
-    let documents = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
 
     var amiitool : Amiitool?
     var plain : Data = Data()
@@ -111,16 +116,9 @@ class TagStore : NSObject, ObservableObject, NFCTagReaderSessionDelegate {
     }
 
     func loadKeyRetail() -> Bool {
-        let key_retail = self.documents.appendingPathComponent(KEY_RETAIL).path
-        if (!fm.fileExists(atPath: key_retail)) {
-            self.error = "\(key_retail) missing"
-            do {
-                let LA_PATH = FileManager.default.urls(for: .applicationSupportDirectory, in: .localDomainMask).first!
-                let keyPath = LA_PATH.appendingPathComponent(KEY_RETAIL)
-                try fm.copyItem(at: keyPath, to: self.documents.appendingPathComponent(KEY_RETAIL))
-            } catch {
-                return false
-            }
+        guard let key_retail = Bundle.main.path(forResource: "key_retail", ofType: "bin") else {
+            self.error = "key_retail.bin not found"
+            return false
         }
         do {
             let attr = try fm.attributesOfItem(atPath: key_retail)

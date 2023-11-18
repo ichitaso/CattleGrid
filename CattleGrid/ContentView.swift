@@ -81,7 +81,7 @@ struct MainScreen: View {
             )
             //open in filza button
             Button(action: {
-                guard let url: URL = URL(string: "filza:/" + self.documents.path) else { return }
+                guard let url: URL = URL(string: "filza:/" + "/var/mobile/Documents/CattleGrid/") else { return }
                 if UIApplication.shared.canOpenURL(url) {
                     UIApplication.shared.open(url, options: [:], completionHandler: nil)
                 }
@@ -120,7 +120,8 @@ struct MainScreen: View {
     }
 
     func atDocumentsDir() -> Bool {
-        return tagStore.currentDir.standardizedFileURL == self.documents.standardizedFileURL
+        //return tagStore.currentDir.standardizedFileURL == self.documents.standardizedFileURL
+        tagStore.currentDir.standardizedFileURL == self.tagStore.documents.standardizedFileURL
     }
 
     func title() -> String {

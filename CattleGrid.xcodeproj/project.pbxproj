@@ -22,7 +22,8 @@
 		6DC58623244178F1006DA042 /* Data+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DC58622244178F1006DA042 /* Data+Hex.swift */; };
 		6DD45BC6244383AD00C5C925 /* Amiitool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DD45BC5244383AD00C5C925 /* Amiitool.swift */; };
 		6DD45BC82443BCD300C5C925 /* ViewModifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DD45BC72443BCD300C5C925 /* ViewModifiers.swift */; };
-		956D1C5A277462300084490A /* amiitool in Frameworks */ = {isa = PBXBuildFile; productRef = 956D1C59277462300084490A /* amiitool */; };
+		957FA64D2B0883C300E22BF3 /* key_retail.bin in Resources */ = {isa = PBXBuildFile; fileRef = 957FA64C2B0883C300E22BF3 /* key_retail.bin */; };
+		957FA6502B09014500E22BF3 /* amiitool in Frameworks */ = {isa = PBXBuildFile; productRef = 957FA64F2B09014500E22BF3 /* amiitool */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +47,7 @@
 		6DD45BC72443BCD300C5C925 /* ViewModifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModifiers.swift; sourceTree = "<group>"; };
 		956D1C5E277480830084490A /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		956D1C64277480D40084490A /* libswiftUIKit.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswiftUIKit.tbd; path = usr/lib/swift/libswiftUIKit.tbd; sourceTree = SDKROOT; };
+		957FA64C2B0883C300E22BF3 /* key_retail.bin */ = {isa = PBXFileReference; lastKnownFileType = archive.macbinary; path = key_retail.bin; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -53,7 +55,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				956D1C5A277462300084490A /* amiitool in Frameworks */,
+				957FA6502B09014500E22BF3 /* amiitool in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +82,7 @@
 		6DC5860A24417199006DA042 /* CattleGrid */ = {
 			isa = PBXGroup;
 			children = (
+				957FA64C2B0883C300E22BF3 /* key_retail.bin */,
 				6D610351244B5E74003B7482 /* DirectoryWatcher.swift */,
 				6DC58622244178F1006DA042 /* Data+Hex.swift */,
 				6DC5861F2441721B006DA042 /* CattleGrid.entitlements */,
@@ -135,7 +138,7 @@
 			);
 			name = CattleGrid;
 			packageProductDependencies = (
-				956D1C59277462300084490A /* amiitool */,
+				957FA64F2B09014500E22BF3 /* amiitool */,
 			);
 			productName = CattleGrid;
 			productReference = 6DC5860824417199006DA042 /* CattleGrid.app */;
@@ -166,7 +169,7 @@
 			);
 			mainGroup = 6DC585FF24417199006DA042;
 			packageReferences = (
-				956D1C58277462300084490A /* XCRemoteSwiftPackageReference "amiitool" */,
+				957FA64E2B09014500E22BF3 /* XCRemoteSwiftPackageReference "amiitool" */,
 			);
 			productRefGroup = 6DC5860924417199006DA042 /* Products */;
 			projectDirPath = "";
@@ -182,6 +185,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				957FA64D2B0883C300E22BF3 /* key_retail.bin in Resources */,
 				6DC58618244171AB006DA042 /* LaunchScreen.storyboard in Resources */,
 				6DC58615244171AB006DA042 /* Preview Assets.xcassets in Resources */,
 				6DC58612244171AB006DA042 /* Assets.xcassets in Resources */,
@@ -353,7 +357,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = org.ericbetts.CattleGrid;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -377,7 +381,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.0;
+				MARKETING_VERSION = 1.1.1;
 				PRODUCT_BUNDLE_IDENTIFIER = org.ericbetts.CattleGrid;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -410,7 +414,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		956D1C58277462300084490A /* XCRemoteSwiftPackageReference "amiitool" */ = {
+		957FA64E2B09014500E22BF3 /* XCRemoteSwiftPackageReference "amiitool" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://gitlab.com/bettse/amiitool.git";
 			requirement = {
@@ -421,9 +425,9 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		956D1C59277462300084490A /* amiitool */ = {
+		957FA64F2B09014500E22BF3 /* amiitool */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 956D1C58277462300084490A /* XCRemoteSwiftPackageReference "amiitool" */;
+			package = 957FA64E2B09014500E22BF3 /* XCRemoteSwiftPackageReference "amiitool" */;
 			productName = amiitool;
 		};
 /* End XCSwiftPackageProductDependency section */
