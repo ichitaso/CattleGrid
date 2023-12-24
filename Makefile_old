@@ -1,0 +1,27 @@
+TARGET = CattleGrid
+ID = "org.ericbetts.cattleGrid"
+VERSION = 1.1.1
+IP = "0.0.0.0"
+PORT = "2222"
+
+.PHONY: all clean
+
+all: clean
+	xcodebuild clean build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO PRODUCT_BUNDLE_IDENTIFIER=$(ID) -sdk iphoneos -configuration Debug -scheme CattleGrid
+
+package:
+	ldid -Sent.plist CattleGrid.app/CattleGrid
+	rm -rf layout/Applications/CattleGrid.app
+	cp -a CattleGrid.app layout/Applications/
+	cp -a layout $(ID)_$(VERSION)_iphoneos-arm
+#	sudo chmod -R 755 $(ID)_$(VERSION)_iphoneos-arm
+#	sudo chmod 666 $(ID)_$(VERSION)_iphoneos-arm/DEBIAN/control
+#	sudo chown -R 0:0 $(ID)_$(VERSION)_iphoneos-arm
+	dpkg-deb -b -Zgzip $(ID)_$(VERSION)_iphoneos-arm
+	rm -rf $(ID)_$(VERSION)_iphoneos-arm
+
+install:
+	scp -P $(PORT) $(ID)_$(VERSION)_iphoneos-arm.deb root@$(IP):/var/mobile/Documents
+
+clean:
+	rm -rf ./*_iphoneos-arm ./*.deb ./*.app layout/Applications/CattleGrid.app

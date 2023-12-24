@@ -7,3 +7,4 @@ CattleGrid.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/
 buildArchive/
 *.deb
 .theos/*
+*.tipa

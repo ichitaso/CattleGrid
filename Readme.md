@@ -6,12 +6,8 @@
 
 <div><video controls src="https://raw.githubusercontent.com/ichitaso/CattleGrid/master/demo.mp4" muted="false"></video></div>
 
-## Notes
-
-- Load `key_retail.bin` and NTAG215 dumps using [iTunes sharing](https://support.apple.com/en-us/HT201301)
-
 ## Description
   
-An app to make your own amiibo using ntag215 and a jailbroken iPhone.
+An app to make your own amiibo using ntag215 and a jailbroken or TrollStore iPhone.
   
 [CattleGrid | ichitaso's Repository](https://cydia.ichitaso.com/depiction/cattlegrid.html)

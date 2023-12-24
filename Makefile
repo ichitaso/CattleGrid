@@ -20,8 +20,15 @@ $(XCODEPROJ_NAME)_CODESIGN_FLAGS = -Sent.plist
 include $(THEOS)/makefiles/common.mk
 include $(THEOS_MAKE_PATH)/xcodeproj.mk
 
-#after-stage::
-#	ldid -Sent.plist $(THEOS_STAGING_DIR)/Applications/$(XCODEPROJ_NAME).app/$(XCODEPROJ_NAME)
+after-stage::
+	@echo "Copying IPA..."
+	mkdir -p $(THEOS_OUTPUT_DIR)/Payload
+	cp -r $(THEOS_STAGING_DIR)/Applications/$(XCODEPROJ_NAME).app $(THEOS_OUTPUT_DIR)/Payload
+	cd $(THEOS_OUTPUT_DIR) && zip -r $(XCODEPROJ_NAME).tipa Payload
+
+clean::
+	@echo "Cleaning IPA..."
+	rm -rf $(THEOS_OUTPUT_DIR)/$(XCODEPROJ_NAME).tipa
 
 after-install::
 ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
